@@ -138,5 +138,5 @@ dmypy.json
 cython_debug/
 
 # Our exclusions
-testfiles/
+testfiles/*
 modules/

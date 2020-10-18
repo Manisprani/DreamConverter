@@ -139,4 +139,5 @@ cython_debug/
 
 # Our exclusions
 testfiles/*
+!testfiles/DWGS_GO_HERE
 modules/

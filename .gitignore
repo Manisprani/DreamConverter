@@ -141,3 +141,6 @@ cython_debug/
 testfiles/*
 !testfiles/DWGS_GO_HERE
 modules/
+*.dwg
+*.dxf
+*.json

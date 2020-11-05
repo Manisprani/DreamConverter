@@ -69,6 +69,7 @@ def convert_recursively(entities, svg):
         if (e.dxftype() == 'INSERT'):
             convert_recursively(e.virtual_entities(), svg)
         else:
+            print(e)
             convert_entity(e, svg)
 
 

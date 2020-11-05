@@ -1,28 +1,39 @@
+import sys, pathlib, ezdxf
 from libredwg import *
-import ezdxf    # if using dxf as intermediate
-import json     # if using json as intermediate
-import pathlib
-import subprocess
-import os, sys
+from ezdxf import recover
+from convertDXF import *
 
 ### I/O ###
-# TODO remove DEBUGGING constant when releasing
-inputFile = "export99.dwg"
-outputFile = "export99.json"  # this decides intermediate file format using dwg_read
+dwg_file = "INPUT FILE HERE.dwg"
+dxf_file = "INTERMEDIATE FILE HERE.dxf"
+svg_file = "OUTPUT FILE HERE.svg"
+# ^ TODO to be decided by Vectorworks API
 
 ### Constants ###
-LIBREDWG_DIR = pathlib.Path(__file__).parent.joinpath('libredwg').absolute()    # this one's a keeper
-INPUT_PATH = LIBREDWG_DIR.joinpath(inputFile).absolute()     # TODO remove DEBUGGING constant when releasing
-OUTPUT_PATH = LIBREDWG_DIR.joinpath(outputFile).absolute()  # TODO remove DEBUGGING constant when releasing
-
-### Methods ###
-def print_entity(e):
-    print("LINE on layer: %s\n" % e.dxf.layer)
-    print("start point: %s\n" % e.dxf.start)
-    print("end point: %s\n" % e.dxf.end)
+LIBREDWG_DIR = pathlib.Path(__file__).parent.joinpath('libredwg').absolute()
+DWG_PATH = LIBREDWG_DIR.joinpath(dwg_file).absolute() 
+DXF_PATH = LIBREDWG_DIR.joinpath(dxf_file).absolute() 
+SVG_PATH = LIBREDWG_DIR.joinpath(svg_file).absolute()
+# ^ TODO to be decided by the Vectorworks API
 
 
-#dwg_to_dxf(INPUT_PATH)
-dwg_read(INPUT_PATH, OUTPUT_PATH)
+### PROGRAM ###
+dwg_to_dxf(DWG_PATH)
 
-
+try:
+    doc = ezdxf.readfile(DXF_PATH)                                   # some dxfs are broken, and instead needs recover.readfile(...), that's kinda scary!
+    msp = doc.modelspace()
+    svg = svgwrite.Drawing(filename=SVG_PATH, debug=True)
+    for e in msp:
+        if e.dxftype() == 'INSERT':
+            convert_recursively(e.virtual_entities(), svg)
+        else:
+            convert_entity(e, svg)
+    svg.viewbox(0, 0, 100000, 100000)                                   # TODO identify DWG document bounds and assign them here instead
+    svg.save()
+except IOError:
+    print(f'Not a DXF file or a generic I/O error.')
+    sys.exit(1)
+except ezdxf.DXFStructureError:
+    print(f'Invalid or corrupted DXF file.')
+    sys.exit(2)

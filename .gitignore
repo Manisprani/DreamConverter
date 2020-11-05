@@ -144,3 +144,4 @@ modules/
 *.dwg
 *.dxf
 *.json
+*.svg

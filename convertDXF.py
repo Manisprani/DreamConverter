@@ -50,11 +50,18 @@ def convert_polyline(dxf_entity):
     xy_points = []
     for p in points:
         xy_points.append(p[:2])
-    svg_entity = svgwrite.Drawing().polyline(
-        xy_points,
-        fill="none",
-        stroke="green",
-        stroke_width=STROKE_WIDTH)
+    if dxf_entity.is_closed:
+        svg_entity = svgwrite.Drawing().polygon(
+            xy_points,
+            fill="none",
+            stroke="green",
+            stroke_width=STROKE_WIDTH)
+    else:
+        svg_entity = svgwrite.Drawing().polyline(
+            xy_points,
+            fill="none",
+            stroke="green",
+            stroke_width=STROKE_WIDTH)
     return svg_entity
 
 
@@ -106,10 +113,6 @@ def convert_mtext(dxf_entity):
     return svg_entity
 
 
-def convert_polyline(dxf_entity):
-    return None
-
-
 def convert_recursively(entities, svg):
     for e in entities:
         if (e.dxftype() == 'INSERT'):
@@ -132,5 +135,3 @@ def convert_entity(entity, svg):
     #     svg.add(convert_ARC(entity))     # FIXME undefined behaviour
     if entity.dxftype() == 'ELLIPSE':
         svg.add(convert_ellipse(entity))
-    if entity.dxftype() == 'MTEXT':
-        svg.add(convert_mtext(entity))

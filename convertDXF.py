@@ -74,39 +74,24 @@ def convert_lwpolyline(dxf_entity):
     return svg_entity
 
 
-def convert_ARC(dxf_entity):
-    center = dxf_entity.dxf.center[:2]
-    radius = dxf_entity.dxf.radius
+def convert_arc(dxf_entity):
+    start = dxf_entity.start_point[:-1]
+    end = dxf_entity.end_point[:-1]
     start_angle = dxf_entity.dxf.start_angle
     end_angle = dxf_entity.dxf.end_angle
-    target = [center[0] + math.cos(end_angle), center[1] + math.sin(end_angle)]
-    if (abs(start_angle - end_angle) < math.pi):
-        large_arc = False
-    else:
-        large_arc = True
-    if (end_angle - start_angle > 0):
-        angle_dir = '+'
-    else:
-        angle_dir = '-'
-    svg_entity = svgwrite.Drawing().path(d=(
-        "M",
-        center[0] + math.cos(start_angle),
-        center[1] + math.sin(start_angle),
-    ),
-        stroke_width=STROKE_WIDTH)
-    svg_entity.push_arc(target,
-                        0,
-                        radius,
-                        large_arc=large_arc,
-                        angle_dir=angle_dir,
-                        absolute=False)
+    svg_entity = svgwrite.Drawing().path(
+        d=("M", start[0], start[1], 'C', start[0] + math.cos(start_angle),
+           start[1] + math.sin(start_angle), end[0] + math.cos(end_angle),
+           end[1] + math.sin(end_angle), end[0], end[1]),
+        fill_opacity="0.0",
+        stroke_width=STROKE_WIDTH,
+        stroke='grey')
     return svg_entity
 
 
 # FIXME entities are added to SVG, but they're not visible. Scale-related?
 def convert_mtext(dxf_entity):
     position = dxf_entity.dxf.insert[:-1]
-    print(position)
     content = dxf_entity.text
     svg_entity = svgwrite.Drawing().text(content, position)
     svg_entity.scale(SCALE)
@@ -118,7 +103,6 @@ def convert_recursively(entities, svg):
         if (e.dxftype() == 'INSERT'):
             convert_recursively(e.virtual_entities(), svg)
         else:
-            print(e)
             convert_entity(e, svg)
 
 
@@ -131,7 +115,9 @@ def convert_entity(entity, svg):
         svg.add(convert_lwpolyline(entity))
     if entity.dxftype() == 'POLYLINE':
         svg.add(convert_polyline(entity))
-    # if entity.dxftype() == 'ARC':
-    #     svg.add(convert_ARC(entity))     # FIXME undefined behaviour
+    if entity.dxftype() == 'ARC':
+        svg.add(convert_arc(entity))
     if entity.dxftype() == 'ELLIPSE':
         svg.add(convert_ellipse(entity))
+    if entity.dxftype()=='MTEXT':
+        svg.add(convert_mtext(entity))

@@ -31,6 +31,42 @@ def convert_circle(dxf_entity):
     return svg_entity
 
 
+def convert_ellipse(dxf_entity):
+    center = dxf_entity.dxf.center[:2]
+    major_axis = dxf_entity.dxf.major_axis
+    minor_axis = dxf_entity.minor_axis
+    r = [major_axis[0], minor_axis[1]]
+    svg_entity = svgwrite.Drawing().ellipse(
+        center=center,
+        r=r,
+        fill="none",
+        stroke="red",
+        stroke_width=STROKE_WIDTH)
+    return svg_entity
+
+
+def convert_polyline(dxf_entity):
+    points = dxf_entity.points()
+    xy_points = []
+    for p in points:
+        xy_points.append(p[:2])
+    svg_entity = svgwrite.Drawing().polyline(
+        xy_points,
+        fill="none",
+        stroke="green",
+        stroke_width=STROKE_WIDTH)
+    return svg_entity
+
+
+def convert_lwpolyline(dxf_entity):
+    points = dxf_entity.vertices()
+    svg_entity = svgwrite.Drawing().polyline(
+        points,
+        stroke="blue",
+        stroke_width=STROKE_WIDTH)
+    return svg_entity
+
+
 def convert_ARC(dxf_entity):
     center = dxf_entity.dxf.center[:2]
     radius = dxf_entity.dxf.radius
@@ -50,7 +86,7 @@ def convert_ARC(dxf_entity):
         center[0] + math.cos(start_angle),
         center[1] + math.sin(start_angle),
     ),
-                                         stroke_width=STROKE_WIDTH)
+        stroke_width=STROKE_WIDTH)
     svg_entity.push_arc(target,
                         0,
                         radius,
@@ -78,5 +114,11 @@ def convert_entity(entity, svg):
         svg.add(convert_line(entity))
     if entity.dxftype() == 'CIRCLE':
         svg.add(convert_circle(entity))
+    if entity.dxftype() == 'LWPOLYLINE':
+        svg.add(convert_lwpolyline(entity))
+    if entity.dxftype() == 'POLYLINE':
+        svg.add(convert_polyline(entity))
     # if entity.dxftype() == 'ARC':
     #     svg.add(convert_ARC(entity))     # FIXME undefined behaviour
+    if entity.dxftype() == 'ELLIPSE':
+        svg.add(convert_ellipse(entity))

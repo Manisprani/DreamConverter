@@ -96,6 +96,16 @@ def convert_ARC(dxf_entity):
     return svg_entity
 
 
+# FIXME entities are added to SVG, but they're not visible. Scale-related?
+def convert_mtext(dxf_entity):
+    position = dxf_entity.dxf.insert[:-1]
+    print(position)
+    content = dxf_entity.text
+    svg_entity = svgwrite.Drawing().text(content, position)
+    svg_entity.scale(SCALE)
+    return svg_entity
+
+
 def convert_polyline(dxf_entity):
     return None
 
@@ -122,3 +132,5 @@ def convert_entity(entity, svg):
     #     svg.add(convert_ARC(entity))     # FIXME undefined behaviour
     if entity.dxftype() == 'ELLIPSE':
         svg.add(convert_ellipse(entity))
+    if entity.dxftype() == 'MTEXT':
+        svg.add(convert_mtext(entity))

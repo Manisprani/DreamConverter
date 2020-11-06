@@ -145,3 +145,4 @@ modules/
 *.dxf
 *.json
 *.svg
+log.txt

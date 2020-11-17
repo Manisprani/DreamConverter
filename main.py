@@ -4,9 +4,9 @@ import svgbuilder, log
 from convertDXF import *
 
 ### I/O ###                     # TODO to be decided by Vectorworks API
-dwg_file = 'export99.dwg'       # TODO currently not used. Vectorworks API will load chosen DWG, export it to DXF, and use the exported DXF as it's intermediary file
-dxf_file = 'export99.dxf'
-svg_file = 'export99.svg'
+dwg_file = '26470A7.dwg'       # TODO currently not used. Vectorworks API will load chosen DWG, export it to DXF, and use the exported DXF as it's intermediary file
+dxf_file = '26470A7.dxf'
+svg_file = '26470A7.svg'
 
 ### Constants ###                   # TODO to be decided by the Vectorworks API
 LIBREDWG_DIR = pathlib.Path(__file__).parent.joinpath('files').absolute()
@@ -15,7 +15,7 @@ DXF_PATH = LIBREDWG_DIR.joinpath(dxf_file).absolute()
 SVG_PATH = LIBREDWG_DIR.joinpath(svg_file).absolute()
 
 ### PROGRAM ###
-log.to('/files/log.txt', False)
+log.to('./files/_log.txt', True)
 try:
     svgbuilder.build(DXF_PATH, SVG_PATH)
 except IOError:

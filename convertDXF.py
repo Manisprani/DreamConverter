@@ -1,12 +1,16 @@
 import svgwrite
+from ezdxf.math import OCS
 import math
 SCALE = 1
 STROKE_WIDTH = 30
 
 
 def convert_line(dxf_entity):
-    line_start = dxf_entity.dxf.start[:2]
-    line_end = dxf_entity.dxf.end[:2]
+    ocs: OCS = dxf_entity.ocs()
+    ocs_line_start = dxf_entity.dxf.start
+    ocs_line_end = dxf_entity.dxf.end
+    line_start = [ocs.to_wcs(ocs_line_start).x, ocs.to_wcs(ocs_line_start).y]
+    line_end = [ocs.to_wcs(ocs_line_end).x, ocs.to_wcs(ocs_line_end).y]
     svg_entity = svgwrite.Drawing().line(
         start=line_start,
         end=line_end,
@@ -18,7 +22,10 @@ def convert_line(dxf_entity):
 
 
 def convert_circle(dxf_entity):
-    circle_center = dxf_entity.dxf.center[:2]
+    ocs: OCS = dxf_entity.ocs()
+    circle_center = dxf_entity.dxf.center
+    circle_center = [ocs.to_wcs(circle_center).x, ocs.to_wcs(circle_center).y]
+
     circle_radius = dxf_entity.dxf.radius
     svg_entity = svgwrite.Drawing().circle(
         center=circle_center,
@@ -32,7 +39,9 @@ def convert_circle(dxf_entity):
 
 
 def convert_ellipse(dxf_entity):
-    center = dxf_entity.dxf.center[:2]
+    ocs: OCS = dxf_entity.ocs()
+    center = dxf_entity.dxf.center
+    center = [ocs.to_wcs(center).x, ocs.to_wcs(center).y]
     major_axis = dxf_entity.dxf.major_axis
     minor_axis = dxf_entity.minor_axis
     r = [major_axis[0], minor_axis[1]]
@@ -45,11 +54,13 @@ def convert_ellipse(dxf_entity):
     return svg_entity
 
 
-def convert_polyline(dxf_entity):
-    points = dxf_entity.points()
+def convert_polyline(dxf_entity):   # fix this 
+    ocs: OCS = dxf_entity.ocs()
+    ocs_points = dxf_entity.points()
+    wcs_points = ocs.points_to_wcs(ocs_points)
     xy_points = []
-    for p in points:
-        xy_points.append(p[:2])
+    for p in wcs_points:
+        xy_points.append([p.x, p.y])
     if dxf_entity.is_closed:
         svg_entity = svgwrite.Drawing().polygon(
             xy_points,
@@ -66,7 +77,9 @@ def convert_polyline(dxf_entity):
 
 
 def convert_lwpolyline(dxf_entity):
-    points = dxf_entity.vertices()
+    ocs: OCS = dxf_entity.ocs()
+    ocs_points = dxf_entity.vertices()
+    points= ocs.points_to_wcs(ocs_points)
     svg_entity = svgwrite.Drawing().polyline(
         points,
         stroke="blue",
@@ -75,8 +88,11 @@ def convert_lwpolyline(dxf_entity):
 
 
 def convert_arc(dxf_entity):
-    start = dxf_entity.start_point[:-1]
-    end = dxf_entity.end_point[:-1]
+    ocs: OCS = dxf_entity.ocs()
+    ocs_start = dxf_entity.start_point
+    ocs_end = dxf_entity.end_point
+    start = [ocs.to_wcs(ocs_start).x, ocs.to_wcs(ocs_start).y]
+    end = [ocs.to_wcs(ocs_end).x, ocs.to_wcs(ocs_end).y]
     r = dxf_entity.dxf.radius
     svg_entity = svgwrite.Drawing().path(
         d=("M", start[0], start[1],
@@ -90,24 +106,24 @@ def convert_arc(dxf_entity):
 
 # FIXME entities are added to SVG, but they're not visible. Scale-related?
 def convert_mtext(dxf_entity):
+    ocs: OCS = dxf_entity.ocs()
     position = dxf_entity.dxf.insert[:-1]
-    print(position)
+    # TODO ocs (really...?)
     content = dxf_entity.text
     svg_entity = svgwrite.Drawing().text(content, position)
     svg_entity.scale(SCALE)
     return svg_entity
 
 
-def convert_recursively(entities, svg):
+def convert_recursively(entities, svg, parent=None):
     for e in entities:
         if (e.dxftype() == 'INSERT'):
             convert_recursively(e.virtual_entities(), svg)
         else:
-            print(e)
             convert_entity(e, svg)
 
 
-def convert_entity(entity, svg):
+def convert_entity(entity, svg, parent=None):
     if entity.dxftype() == 'LINE':
         svg.add(convert_line(entity))
     if entity.dxftype() == 'CIRCLE':

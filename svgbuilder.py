@@ -7,8 +7,6 @@ def build(input, output):
     msp = doc.modelspace()
     maxPosition = (doc.header['$EXTMAX'])
     minPosition = (doc.header['$EXTMIN'])  # finds the bounds of the dxf
-    print(doc.header['$EXTMAX'])
-    print(doc.header['$EXTMIN'])
 
     svg = svgwrite.Drawing(filename=output, debug=True)
     for e in msp:

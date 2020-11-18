@@ -54,7 +54,9 @@ def convert_ellipse(dxf_entity):
     return svg_entity
 
 
-def convert_polyline(dxf_entity):   # fix this
+def convert_polyline(dxf_entity):
+    if dxf_entity.get_mode().lower() not in ["acdb2dpolyline"]:
+        return
     ocs: OCS = dxf_entity.ocs()
     ocs_points = dxf_entity.points()
     wcs_points = ocs.points_to_wcs(ocs_points)
@@ -115,7 +117,7 @@ def convert_arc(dxf_entity):
 def convert_mtext(dxf_entity):
     ocs: OCS = dxf_entity.ocs()
     position = dxf_entity.dxf.insert[:-1]
-    # TODO ocs (really...?)
+    # TODO ocs (really...?) No
     content = dxf_entity.text
     svg_entity = svgwrite.Drawing().text(content, position)
     svg_entity.scale(SCALE)
@@ -138,7 +140,8 @@ def convert_entity(entity, svg, parent=None):
     if entity.dxftype() == 'LWPOLYLINE':
         svg.add(convert_lwpolyline(entity))
     if entity.dxftype() == 'POLYLINE':
-        svg.add(convert_polyline(entity))
+        if convert_polyline(entity) is not None:
+            svg.add(convert_polyline(entity))
     if entity.dxftype() == 'ARC':
         svg.add(convert_arc(entity))
     if entity.dxftype() == 'ELLIPSE':

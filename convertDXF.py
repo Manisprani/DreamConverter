@@ -54,7 +54,7 @@ def convert_ellipse(dxf_entity):
     return svg_entity
 
 
-def convert_polyline(dxf_entity):   # fix this 
+def convert_polyline(dxf_entity):   # fix this
     ocs: OCS = dxf_entity.ocs()
     ocs_points = dxf_entity.points()
     wcs_points = ocs.points_to_wcs(ocs_points)
@@ -79,9 +79,16 @@ def convert_polyline(dxf_entity):   # fix this
 def convert_lwpolyline(dxf_entity):
     ocs: OCS = dxf_entity.ocs()
     ocs_points = dxf_entity.vertices()
-    points= ocs.points_to_wcs(ocs_points)
+    # xy->xyz för att anppassa points_to_wcs transform vector
+    xyz_points = []
+    for p in ocs_points:
+        xyz_points.append([p[0], p[1], 0])
+    points = ocs.points_to_wcs(xyz_points)
+    xy_points = []
+    for p in points:
+        xy_points.append(p[0:2])
     svg_entity = svgwrite.Drawing().polyline(
-        points,
+        xy_points,
         stroke="blue",
         stroke_width=STROKE_WIDTH)
     return svg_entity

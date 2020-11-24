@@ -1,20 +1,28 @@
-import sys, pathlib, ezdxf
-import svgbuilder, log
+import sys
+import pathlib
+import ezdxf
+import svgbuilder
 from convertDXF import *
 
 
-def run(filename):
-    ### I/O ###                     # TODO to be decided by Vectorworks API
-    dxf_file = filename+'.dxf'
-    svg_file = filename+'.svg'
+def run(input_file: str, output_path=None, debug: bool = False):
+    if output_path:
+        output_path = output_path[1]
 
-    ### Constants ###                   # TODO to be decided by the Vectorworks API
-    LIBREDWG_DIR = pathlib.Path(__file__).parent.joinpath('files').absolute()
-    DXF_PATH = LIBREDWG_DIR.joinpath(dxf_file).absolute()
-    SVG_PATH = LIBREDWG_DIR.joinpath(svg_file).absolute()
+    if debug:
+        DEBUG_DIR = pathlib.Path(__file__).parent.joinpath('files').absolute()
+        DXF_PATH = DEBUG_DIR.joinpath(input_file).absolute()
+        SVG_PATH = DEBUG_DIR.joinpath(
+            input_file.replace('.dxf', '.svg')).absolute()
+    else:
+        DXF_PATH = pathlib.Path(input_file).absolute()
+        if output_path:
+            SVG_PATH = pathlib.Path(output_path).joinpath(
+                DXF_PATH.name.replace('.dxf', '.svg'))
+        else:
+            SVG_PATH = input_file.replace('.dxf', '.svg')
 
     ### PROGRAM ###
-    log.to('./files/_log.txt', True)
     try:
         svgbuilder.build(DXF_PATH, SVG_PATH)
     except IOError:
@@ -25,8 +33,8 @@ def run(filename):
         sys.exit(2)
 
 
-run('ullatestdel')
+run('export99.dxf', None, True)
 
-# vi kan ha excepts i vs-skriptet, 
+# vi kan ha excepts i vs-skriptet,
 # och visa alert dialog om IOError
-#  eller DXFStructureError visas väl? :D
+# eller DXFStructureError visas väl? :D

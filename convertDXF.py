@@ -14,7 +14,7 @@ def convert_line(dxf_entity):
     svg_entity = svgwrite.Drawing().line(
         start=line_start,
         end=line_end,
-        stroke="black",
+       # stroke="black",
         stroke_width=STROKE_WIDTH,
     )
     svg_entity.scale(SCALE)

@@ -12,7 +12,7 @@ def build(input, output):
     maxPosition = (doc.header['$EXTMAX'])
     minPosition = (doc.header['$EXTMIN'])  # finds the bounds of the dxf
 
-    svg = svgwrite.Drawing(filename=output, debug=False)
+    svg = svgwrite.Drawing(filename=output, debug=False, transform="scale(1,-1)")
     for e in msp:
         if e.dxftype() == 'INSERT':
             # if not e.dxf.name.startswith('$'):
@@ -26,7 +26,7 @@ def build(input, output):
                 type=e.get_attrib_text("TEXT1", "None"),
                 stroke="black"
             ))
-            
+
             convert_recursively(e.virtual_entities(), svg_group)
         else:
             convert_entity(e, svg)

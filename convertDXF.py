@@ -1,8 +1,7 @@
 import svgwrite
 from ezdxf.math import OCS
-import math
 SCALE = 1
-STROKE_WIDTH = 30
+STROKE_WIDTH = 50
 
 
 def convert_line(dxf_entity):
@@ -111,18 +110,7 @@ def convert_arc(dxf_entity):
         stroke_width=STROKE_WIDTH,
         stroke='grey')
     return svg_entity
-
-
-# FIXME entities are added to SVG, but they're not visible. Scale-related?
-def convert_mtext(dxf_entity):
-    ocs: OCS = dxf_entity.ocs()
-    position = dxf_entity.dxf.insert[:-1]
-    # TODO ocs (really...?) No
-    content = dxf_entity.text
-    svg_entity = svgwrite.Drawing().text(content, position)
-    svg_entity.scale(SCALE)
-    return svg_entity
-
+    
 
 def convert_recursively(entities, svg, parent=None):
     for e in entities:

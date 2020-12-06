@@ -16,7 +16,6 @@ def run(input_path: str, output_path=None, debug: bool = False):
         DXF_PATH = input_path
         SVG_PATH = output_path
 
-
     ### PROGRAM ###
     try:
         svgbuilder.build(DXF_PATH, SVG_PATH)
@@ -26,9 +25,6 @@ def run(input_path: str, output_path=None, debug: bool = False):
     except ezdxf.DXFStructureError:
         print(f'Invalid or corrupted DXF file.')
         sys.exit(2)
-
-
-run('export99.dxf', None, True)
 
 # vi kan ha excepts i vs-skriptet,
 # och visa alert dialog om IOError

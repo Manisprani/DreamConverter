@@ -1,26 +1,21 @@
 import sys
-import pathlib
 import ezdxf
+import pathlib
 import svgbuilder
 from convertDXF import *
 
 
-def run(input_file: str, output_path=None, debug: bool = False):
-    if output_path:
-        output_path = output_path[1]
+def run(input_path: str, output_path=None, debug: bool = False):
 
     if debug:
         DEBUG_DIR = pathlib.Path(__file__).parent.joinpath('files').absolute()
-        DXF_PATH = DEBUG_DIR.joinpath(input_file).absolute()
+        DXF_PATH = DEBUG_DIR.joinpath(input_path).absolute()
         SVG_PATH = DEBUG_DIR.joinpath(
-            input_file.replace('.dxf', '.svg')).absolute()
+            input_path.replace('.dxf', '.svg')).absolute()
     else:
-        DXF_PATH = pathlib.Path(input_file).absolute()
-        if output_path:
-            SVG_PATH = pathlib.Path(output_path).joinpath(
-                DXF_PATH.name.replace('.dxf', '.svg'))
-        else:
-            SVG_PATH = input_file.replace('.dxf', '.svg')
+        DXF_PATH = input_path
+        SVG_PATH = output_path
+
 
     ### PROGRAM ###
     try:

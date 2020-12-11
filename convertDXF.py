@@ -154,8 +154,6 @@ def convert_conveyor_block(dxf_entity, svg_group, svg):
     # if no arcs, link the blocks corners
     else:
         vertexs = v.get_extrempoints()
-        for vt in vertexs:
-            print(str(vt[0])+" "+str(vt[1]))
         path = svgwrite.Drawing().path(
             d=("M", vertexs[3][0], vertexs[3][1]),
             # stroke="black",

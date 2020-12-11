@@ -59,9 +59,10 @@ def build(input, output):
                 type=e_type,
                 stroke="black"
             ))
-            #print("id= "+e.dxf.name + "\t code= " +
-                  #get_code(str(e.dxf.name))+"\t type= "+e_type)
-            convert_recursively(e.virtual_entities(), svg_group)
+            if e_type == "conveyor":
+                convert_conveyor_block(e, svg_group, svg)
+            else:
+                convert_recursively(e.virtual_entities(), svg_group)
         else:
             convert_entity(e, svg)
     svg.viewbox(minPosition[0], minPosition[1], maxPosition[0] +

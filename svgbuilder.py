@@ -3,24 +3,16 @@ import svgwrite
 import ezdxf
 from svgwrite.container import SVG
 from convertDXF import *
-
-TYPES = {
-    "RF": "conveyor",
-    "X0": "drop",
-    "MA": "motor",
-    "BG": "encoder",
-    "X1": "estop",
-    "SG": "photoeye",
-    "X2": "clst",
-    "QB": "switch ??",
-    "KF": "någoting"}
+#from parsing_convention import *
+from NO_COMMIT_parsing_convention import *
 
 
 def get_code(s):
     left = '.01.'
     right = '_'
+    print(s)
     code = s[s.index(left)+len(left):s.index(right)]
-    if '-' not in code:
+    if COMPONENT_DIVIDER not in code:
         if '.' in code:
             code = code.split('.')[0]
     return code
@@ -32,11 +24,12 @@ def get_type(s):
         right = '_'
         code = s[s.index(left)+len(left):s.index(right)]
         code = re.split("[-.]", code)[-1]
+
         for key in TYPES.keys():
             if key in code:
                 return TYPES[key]
     except:
-        return ""
+        return ["", False]
 
 
 def build(input, output):
@@ -49,22 +42,24 @@ def build(input, output):
                            transform="scale(1,-1)")
     for e in msp:
         if e.dxftype() == 'INSERT':
-            e_type = get_type(str(e.dxf.name))
-            if e_type not in TYPES.values():
-                continue
+            if not e.dxf.name.startswith(CONVERSION_MARKER): continue
+
+            res = get_type(str(e.dxf.name))
+            if res is None: continue
+            e_type, draw = res
+
             svg_group = svg.add(svg.g(
                 id=e.dxf.name,
                 code=get_code(str(e.dxf.name)),
-                #code=e.get_attrib_text("BMK", "None"),
                 type=e_type,
                 stroke="black"
             ))
             if e_type == "conveyor":
                 convert_conveyor_block(e, svg_group, svg)
-            else:
+            elif draw:
                 convert_recursively(e.virtual_entities(), svg_group)
         else:
             convert_entity(e, svg)
-    svg.viewbox(minPosition[0], minPosition[1], maxPosition[0] +
-                abs(minPosition[0]), maxPosition[1] + abs(minPosition[1]))
+    svg.viewbox(minPosition[0], minPosition[1], maxPosition[0] -
+                minPosition[0], maxPosition[1] - minPosition[1])
     svg.save()

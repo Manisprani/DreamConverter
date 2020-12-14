@@ -15,7 +15,7 @@
 <br>
 <br>
 
-# Introduction
+## Introduction
 Vectovert is a Python script that converts DXF files to SVG files. The repository includes a plugin script for Vectorworks 2021 and a standalone script for use outside of the Vectorworks interface. 
 
 Vectovert uses *ezdxf* and *svgwrite* to parse DXF files, convert graphical DXF entities to SVG elements, inject them with custom attributes and finally write them to a SVG file. 
@@ -24,7 +24,7 @@ Vectovert uses *ezdxf* and *svgwrite* to parse DXF files, convert graphical DXF 
 <br>
 <br>
 
-# Dependencies
+## Dependencies
 * **Python 3.6+** 
 * **ezdxf** - *tested with version 0.14.2*
 * **svgwrite** - *tested with version 1.4*
@@ -33,8 +33,8 @@ Vectovert uses *ezdxf* and *svgwrite* to parse DXF files, convert graphical DXF 
 <br>
 <br>
 
-# Installation
-## Standalone
+## Installation
+### Standalone
 Installing Vectovert as a standalone involves less steps than setting it up as a plugin for Vectorworks 2021. The steps are detailed below:
 
 1. Download this repository from GitHub (https://github.com/Manisprani/Vectovert)
@@ -43,16 +43,16 @@ Installing Vectovert as a standalone involves less steps than setting it up as a
 
 <br>
 
-## Vectorworks 2021
+### Vectorworks 2021
 Installing Vectovert as a Vectorworks plugin consists of a few more steps. Since Vectorworks includes its own Python installation, installing the dependencies is not done manually. Instead, Marionette handles this through the .vsm script. The steps are categorized and detailed below:
 
-### Get and setup Vectovert
+#### Get and setup Vectovert
 1. Download this repository from GitHub (https://github.com/Manisprani/Vectovert)
 2. Put the .vsm script in the directory: `User\AppData\Roaming\Nemetschek\Vectorworks\2021\Plug-ins`
 3. Go to Tools -> Plugins -> Script options in Vectorworks and add the downloaded Vectovert repository folder containing the `main.py` to the path.
 4. Restart Vectorworks.
 
-### Add “Convert to SVG” to the export-menu.
+#### Add “Convert to SVG” to the export-menu.
 
 1. Press Tools - Workspaces - Edit Current Workspace. Two panels Commands and Menu show up. 
 2. Open Import/Export in the Commands panel.
@@ -60,7 +60,7 @@ Installing Vectovert as a Vectorworks plugin consists of a few more steps. Since
 4. Drag “Convert to SVG” from Commands and drop it under Export in Menus.
 5. Press OK.
 
-### Install plugin dependencies
+#### Install plugin dependencies
 
 1. Navigate to and click File - Export - Convert to SVG. 
 2. If this is the first time running the plugin, a command prompt will ask you to install the dependencies ezdxf and svgwrite. Press OK for both these prompts.
@@ -71,15 +71,15 @@ Installing Vectovert as a Vectorworks plugin consists of a few more steps. Since
 <br>
 <br>
 
-# Usage
-## Standalone
+## Usage
+### Standalone
 After ensuring your machine is running Python 3.6 or newer, and the module dependencies are installed, you can run the script through a command line as you would any Python script: `python3 vectovert_standalone.py`
 
 Alternatively, use the provided file `vectovert.bat`, to run the command above.
 
 <br>
 
-## Vectorworks 2021
+### Vectorworks 2021
 When the plugin has been added to the Import/Export menu, it is simply run by:
 
 1. Navigating to the Import/Export menu and clicking Convert to SVG... 
@@ -94,31 +94,41 @@ Given the recursive nature of the plugin (and the size of some DWG files), the c
 <br>
 <br>
 
-# Developer: General Plugin Design
+## Developer: General Plugin Design
 The plugin uses Vectorworks built-in DXF export. The generated DXF file is then used as an intermediate file format for conversion to SVG using the Python module ezdxf. Using the Vectorworks API, the file path is chosen and given to the Python script. If the script can’t identify the file as a .DXF or deems the file corrupted, it stops executing.
 
 When SVG conversion begins, all graphical entities in the DXF are iterated over. If it is a singular entity with no children, it is added to the SVG. However, if it is an INSERT (an entity with children entities) it is first added as a SVG group, then its children are iterated over and added to that group. This is done recursively, since INSERTs can contain other INSERTs, with their own children entities.
 
-Every added group gets an attribute code and type assigned to it, signalling its code and component type. The script works on the assumption that the DWG entities follow the naming convention points below:
-* A component name starts with the character `$`
-* The string following `$` is the ID of the component. <br>
-**Example:** A conveyor belt could have the following name: `$A.WA01.01.004RF.RF1_1`
-* A component belonging to another component drops the last dot-separated part of that component’s ID, and adds a suffix that starts with a dash (`-`) followed by the component type and ID.<br>
-**Example:** A motor belonging to the conveyor belt in the point example above could have the name `$A.WA01.01.004RF-MA01_1`
+Every added group gets an attribute code and type assigned to it, signalling its code and component type. The script works on the assumption that the DWG entities follow the naming convention points below (parameters are set in `parsing_convention.py`):
+* A component name starts a special character called `CONVERSION_MARKER`, for instance `&`
+* The string following the conversion marker is the ID of the component. <br>
+**Example:** A conveyor belt could have the following name: `&top.level.object`
+* A component belonging to another component drops the last dot-separated part of that component’s ID, and adds a suffix that starts with a special character `COMPONENT_DIVIDER`, for instance `*`, followed by the component type and ID.<br>
+**Example:** A motor belonging to the conveyor belt in the point example above could have the name `&top.level.object*MOTOR2`
 
 In the generated SVG tags, the code attribute represents the components position - the part it belongs to, typically a conveyor. 
 
-The component ID is parsed to determine what component type to put down the component as, according to the component ID list. This is currently represented by an incomplete, but easily extendable dictionary in [svgbuilder.py](svgbuilder.py).
+The component ID is parsed to determine what component type to put down the component as, according to the component ID list. This is currently configured in a dictionary `TYPES` found in [parsing_convention.py](parsing_convention.py).
 
-So, if the motor `MA.01` is a part of the conveyor `$A.WA01.01.004RF.RF1_1`, its final SVG tag will be as follows: <br> 
+So, if the motor `MOTOR2` is a part of the conveyor `&top.level.conv33`, its final SVG tag will be as follows: <br> 
 ``` 
-<g id="$A.WA01.01.004RF-MA.01" code="$A.WA01.01.004RF" type="motor" />
+<g id="&top.level.conv33*MOTOR2" code="&top.level.conv33" type="motor" />
 ``` 
 
 <br>
 <br>
 <br>
 
-# Known issues
+## Functionality
 
-To be listed...
+Vectovert is currently capable of:
+
+* Draw conveyor objects as fillable blocks
+* Add (and optionally draw) components, used as status indicators for conveyor blocks
+* Automatically set the SVG viewbox so it fits the DWG file.
+
+
+## Known issues
+
+* The SVG conversion does not support object rotation and scaling.
+* Nesting components is not supported. Conveyors and components belonging to these are assumed to exist on the top layer of the DWG.

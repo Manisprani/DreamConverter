@@ -26,6 +26,4 @@ def run(input_path: str, output_path=None, debug: bool = False):
         print(f'Invalid or corrupted DXF file.')
         sys.exit(2)
 
-# vi kan ha excepts i vs-skriptet,
-# och visa alert dialog om IOError
-# eller DXFStructureError visas väl? :D
+# excepts could also be thrown to Vectorworks!

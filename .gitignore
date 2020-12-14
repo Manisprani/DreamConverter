@@ -147,3 +147,4 @@ modules/
 *.svg
 log.txt
 files/_log.txt
+NO_COMMIT_parsing_convention.py

@@ -128,7 +128,46 @@ Vectovert is currently capable of:
 * Automatically set the SVG viewbox so it fits the DWG file.
 
 
-## Known issues
+<br>
+<br>
+<br>
 
-* The SVG conversion does not support object rotation and scaling.
-* Nesting components is not supported. Conveyors and components belonging to these are assumed to exist on the top layer of the DWG.
+## Known issues
+### Symbol scaling and rotation
+ 
+The SVG conversion does not currently support object rotation and scaling. 
+ 
+Currently, the DXF entities are translated from their respective Object Coordinate System (OCS) to the World Coordinate System (WCS) using the utilities found in **ezdxf**. Tests have shown that converting OCS to WCS using said module does not consistently apply necessary transformations to drawn graphical entities.
+ 
+In the time frame of our development, implementing rotation support fell out of scope. A possible solution to this would be accessing the `ezdxf.entities.Insert.dxf.rotation` attribute when adding the SVG group tag, and transforming the group using the attribute values.
+ 
+Implementing scaling support was initially planned, but got perpetually delayed because of its difficulty. Analysis showed that scaled INSERT entities had their attributes `ezdxf.entities.Insert.dxf.xscale` and `ezdxf.entities.Insert.dxf.yscale` modified. The project group attempted to take this into consideration by moving the object to the world origin, scaling it according to `xscale` and `yscale`, and then translating the object back to its intended location. This did not show intended behaviour, and objects were instead drawn outside of the SVG viewbox, or ended up at otherwise undefined locations.
+ 
+The project group also tried solving the scaling issue using the method `ezdxf.entities.Insert.explode()`. The method description in the **ezdxf** documentation made it into a prime candidate for solving the problem, but our tests did not yield the expected results - much like the method mentioned earlier using xscale and yscale.
+ 
+Scaling support is definitely a possible addition to the project using **ezdxf**. Further testing regarding `ezdxf.entities.Insert.explode()`, OCS-to-WCS conversion and the interaction between the two might be the key to developing correct scaling functionality in the script.
+
+<br>
+<br>
+
+### Nested INSERT Symbols
+ 
+Nesting components is not supported. Conveyors and components belonging to these are assumed to exist on the top layer of the DWG.
+ 
+Modelled after a reference file, the first call to the conversion adds INSERT entities as group tags in the SVG. These are the components, and are thus assumed to not be nested in each other. Every subsequent call to the recursive conversion simply keeps iterating over and enters the nested INSERT entities without adding these entities as group tags.
+ 
+If support for nested components is desirable, moving the group tag-creation functionality to the recursive method when an INSERT entity is found would be a good start.
+
+<br>
+<br>
+
+ 
+### Fillable objects
+ 
+Not all SVG elements in the output file are fillable. The base case for the recursive conversion ends up in a choice between converting different graphical DXF entities such as lines, circles, etc. 
+ 
+This is a primitive way of converting the DXF to SVG graphics and initially all conversion was done using this somewhat brute-forced graphical conversion. Since the targeted SCADA software expects to set the the fill attribute of SVG tags, solely utilizing this method is not enough to create a workable SVG. 
+ 
+Instead, as it currently stands, fillable blocks can be created using a specific method, where the entity is transformed into a closed, rectangular and fillable element in the SVG file. For now the only support is for completely vertical or horizontal blocks and the component type is hardcoded as `conveyor`. Since the method in its current state only checks the coordinate extents of a conveyor block, it can only create rectangular, non-rotated blocks. As a result, arcs and rotated conveyors cannot be converted to fillable objects.
+ 
+Extending the dictionary in parsing_convention.py with a flag that signals whether the entity should be hard converted or converted as a fillable block would make the conversion more flexible. One could also use the `convert_conveyor_block()` method as a template for designing (for instance) similar entities that are to be represented as circles. Refining the `convert_conveyor_block()` to create more advanced shapes is also definitely a possibility - the  **ezdxf** module support the acquisition of necessary DXF attributes the **svgwrite** module is capable of creating intricate SVG elements, using the aforementioned attributes.

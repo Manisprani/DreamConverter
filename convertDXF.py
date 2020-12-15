@@ -122,6 +122,10 @@ def convert_arc(dxf_entity, extValues=None):
 
 
 def convert_conveyor_block(dxf_entity, svg_group, svg):
+    ''' 
+    Converts the dxf_entity to a fillable rectangle, by finding the minimum and maximum x- and y-values for its points. \n
+    NOTE: The method can currently only portray vertically or horizontally oriented rectangles. 
+    '''
 
     v = Extra_Value()
     convert_recursively(dxf_entity.virtual_entities(),
@@ -165,6 +169,9 @@ def convert_conveyor_block(dxf_entity, svg_group, svg):
 
 
 def convert_recursively(entities, svg, parent=None, extValues=None):
+    '''
+    Recursively dives into an insert and draws all its children entities. If it's an "end child" (i.e. not an INSERT), no more recursive calls are made.
+    '''
     for e in entities:
         if (e.dxftype() == 'INSERT'):
             convert_recursively(e.virtual_entities(), svg, parent, extValues)
@@ -173,6 +180,13 @@ def convert_recursively(entities, svg, parent=None, extValues=None):
 
 
 def convert_entity(entity, svg, parent=None, extValues=None):
+    '''
+    Converts the entity to a corresponding SVG-element, depending on the entity dxf type. \n
+    It helps decide what shape to draw the most low-level graphical DXF entities as, such as lines, circles, polylines. \n
+
+    NOTE: parent parameter currently unused.
+    '''
+
     if entity.dxftype() == 'LINE':
         if convert_line(entity, extValues) is not None:
             svg.add(convert_line(entity, extValues))
@@ -190,7 +204,7 @@ def convert_entity(entity, svg, parent=None, extValues=None):
 
 
 class Extra_Value:
-    '''record the maximum and minimum value of x and y
+    '''record the maximum and minimum value of x and y,
        collect arcs start and end points'''
 
     def __init__(self):

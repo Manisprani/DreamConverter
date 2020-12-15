@@ -4,8 +4,10 @@ import pathlib
 import svgbuilder
 from convertDXF import *
 
-
 def run(input_path: str, output_path=None, debug: bool = False):
+    '''
+    The main method for running the conversion script. It takes two paths as parameters, so it can be adapted to an interface of choice.
+    '''
 
     if debug:
         DEBUG_DIR = pathlib.Path(__file__).parent.joinpath('files').absolute()

@@ -3,11 +3,14 @@ import svgwrite
 import ezdxf
 from svgwrite.container import SVG
 from convertDXF import *
-#from parsing_convention import *
-from NO_COMMIT_parsing_convention import *
+#from parsing_convention import *               # dummy template parsing rules
+from NO_COMMIT_parsing_convention import *      # change to this when demonstrating
 
 
 def get_code(s):
+    '''
+    Gets the code attribute by parsing the name string (id) of a dxf element.
+    '''
     left = '.01.'
     right = '_'
     print(s)
@@ -19,6 +22,9 @@ def get_code(s):
 
 
 def get_type(s):
+    '''
+    Gets the type attribute by parsing the name string (id) of a dxf element.
+    '''
     try:
         left = '.01.'
         right = '_'
@@ -33,6 +39,9 @@ def get_type(s):
 
 
 def build(input, output):
+    '''
+    Build an SVG file 'output' from a DXF file 'input'.
+    '''
     doc = ezdxf.readfile(input)
     msp = doc.modelspace()
     maxPosition = (doc.header['$EXTMAX'])

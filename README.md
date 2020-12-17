@@ -176,7 +176,7 @@ Scaling support is definitely a possible addition to the project using **ezdxf**
 
 ### Nested INSERT Symbols
  
-Nesting components is not supported. Conveyors and components belonging to these are assumed to exist on the top layer of the DWG.
+Nesting components are not supported. Conveyors and components belonging to these are assumed to exist on the top layer of the DWG.
  
 Modelled after a reference file, the first call to the conversion adds INSERT entities as group tags in the SVG. These are the components, and are thus assumed to not be nested in each other. Every subsequent call to the recursive conversion simply keeps iterating over and enters the nested INSERT entities without adding these entities as group tags.
  

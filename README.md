@@ -8,6 +8,7 @@
 * [Usage](#usage)
     * Standalone
     * Vectorworks 2021
+    * Example: Running the script
 * [Developer: General Plugin Design](#developer-general-plugin-design)
 * [Known issues](#known-issues)
 
@@ -94,6 +95,26 @@ Given the recursive nature of the plugin (and the size of some DWG files), the c
 <br>
 <br>
 
+### Example: Running the script
+
+A use case running the script with the `vectovert.bat` is depicted below. Depending on if your Python path points to *python3* or *python*, you have to alter the bat-file accordingly. The default command in the .bat assumes *python3*.
+
+_Step 1 - Run the vectovert.bat_
+![Step 1 - Run the vectovert.bat](./imgs/bat1.png)
+
+_Step 2 - Command prompt pops up. Choose a DXF file to convert!_
+![Step 2 - Command prompt pops up. Choose a DXF file to convert!](./imgs/bat2.png)
+
+_Step 3 - Choose a destination for the SVG file._
+![Step 3 - Choose a destination for the SVG file.](./imgs/bat3.png)
+
+_Step 4 - Conversion done!_
+![Step 4 - Conversion done!](./imgs/bat4.png)
+
+<br>
+<br>
+<br>
+
 ## Developer: General Plugin Design
 The plugin uses Vectorworks built-in DXF export. The generated DXF file is then used as an intermediate file format for conversion to SVG using the Python module ezdxf. Using the Vectorworks API, the file path is chosen and given to the Python script. If the script can’t identify the file as a .DXF or deems the file corrupted, it stops executing.
 
@@ -126,7 +147,6 @@ Vectovert is currently capable of:
 * Draw conveyor objects as fillable blocks
 * Add (and optionally draw) components, used as status indicators for conveyor blocks
 * Automatically set the SVG viewbox so it fits the DWG file.
-
 
 <br>
 <br>
@@ -167,7 +187,11 @@ If support for nested components is desirable, moving the group tag-creation fun
 Not all SVG elements in the output file are fillable. The base case for the recursive conversion ends up in a choice between converting different graphical DXF entities such as lines, circles, etc. 
  
 This is a primitive way of converting the DXF to SVG graphics and initially all conversion was done using this somewhat brute-forced graphical conversion. Since the targeted SCADA software expects to set the the fill attribute of SVG tags, solely utilizing this method is not enough to create a workable SVG. 
- 
+
 Instead, as it currently stands, fillable blocks can be created using a specific method, where the entity is transformed into a closed, rectangular and fillable element in the SVG file. For now the only support is for completely vertical or horizontal blocks and the component type is hardcoded as `conveyor`. Since the method in its current state only checks the coordinate extents of a conveyor block, it can only create rectangular, non-rotated blocks. As a result, arcs and rotated conveyors cannot be converted to fillable objects.
- 
+
 Extending the dictionary in parsing_convention.py with a flag that signals whether the entity should be hard converted or converted as a fillable block would make the conversion more flexible. One could also use the `convert_conveyor_block()` method as a template for designing (for instance) similar entities that are to be represented as circles. Refining the `convert_conveyor_block()` to create more advanced shapes is also definitely a possibility - the  **ezdxf** module support the acquisition of necessary DXF attributes the **svgwrite** module is capable of creating intricate SVG elements, using the aforementioned attributes.
+
+### Vertically flipped SVG files
+
+Tests have shown that some SVG viewers show the SVG image flipped along the Y axis. During our converison, we flip the whole SVG vertically by adding the attribute `transform=scale(1,-1)` to the main SVG tag. It seems the that not all viewers takes this attribute into consideration. Viewers such as Google Chrome, Mozilla Firefox and Microsoft Edge show the SVG correctly, but Inkscape and Safari Explorer do not. It remains to be tested if the targeted SCADA software can take the transform attribute into consideration or not.

@@ -100,15 +100,19 @@ Given the recursive nature of the plugin (and the size of some DWG files), the c
 A use case running the script with the `vectovert.bat` is depicted below. Depending on if your Python path points to *python3* or *python*, you have to alter the bat-file accordingly. The default command in the .bat assumes *python3*.
 
 _Step 1 - Run the vectovert.bat_
+
 ![Step 1 - Run the vectovert.bat](./imgs/bat1.png)
 
 _Step 2 - Command prompt pops up. Choose a DXF file to convert!_
+
 ![Step 2 - Command prompt pops up. Choose a DXF file to convert!](./imgs/bat2.png)
 
 _Step 3 - Choose a destination for the SVG file._
+
 ![Step 3 - Choose a destination for the SVG file.](./imgs/bat3.png)
 
 _Step 4 - Conversion done!_
+
 ![Step 4 - Conversion done!](./imgs/bat4.png)
 
 <br>
